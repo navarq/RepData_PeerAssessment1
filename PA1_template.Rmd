@@ -9,9 +9,51 @@ output:
 ## Loading and preprocessing the data
 
 
+If the Comma Seperated CSV file does not exist than extract it from the zip file to a data directory
+
+```{r}
+if(!file.exists("./data/activity.csv")){
+                # extract the file to the data folder
+                unzip("activity.zip", exdir = "data", overwrite=TRUE)
+}
+```
+
+Load the data into an activity variable
+
+remove the NAs in the steps column
+```{r}
+activity <- read.csv("data/activity.csv")
+activityWithoutNAs <- activity[!is.na(activity$steps),]
+```
 
 ## What is mean total number of steps taken per day?
 
+Calculate the total number of steps per day
+
+1. Load necessary packages
+
+2. Remove NAs
+
+3. Group by day
+
+4. Summarise total of steps per day
+
+5. Draw a histogram.
+```{r}
+require(dplyr)
+grp <- filter(activity,!is.na(steps)) %>%group_by(day=date) %>% summarise(total=sum(steps))
+hist(grp$total, main="Histogram of Total number\nof Steps per Day", xlab="Total Number of Steps")
+```
+
+Mean of the total number of steps per day
+```{r}
+mean(grp$total)
+```
+
+Median of the total number of steps per day
+```{r}
+median(grp$total)
+```
 
 
 ## What is the average daily activity pattern?
@@ -23,3 +65,9 @@ output:
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+Reset the working directory
+```{r}
+setwd(old.dir)
+```
