@@ -57,7 +57,8 @@ require(dplyr)
 
 ```r
 grp <- filter(activity,!is.na(steps)) %>% group_by(day=date) %>% summarise(total=sum(steps))
-hist(grp$total, main="Histogram of Total Number\nof Steps per Day", xlab="Total Number of Steps" ,breaks=12)
+hist(grp$total, main="Histogram of Total Number\nof Steps per Day", xlab="Total Number of Steps"
+     ,breaks=12)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
@@ -167,7 +168,8 @@ Create a histogram for the new dataset
 
 ```r
 hist(imputedtotal, xlab="Total Number of Steps", 
-     main="Histogram of Total Number\nof Steps per Day\nImputing missing values with Average", breaks=12)
+     main="Histogram of Total Number\nof Steps per Day\nImputing missing values with Average", 
+     breaks=12)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
@@ -240,7 +242,8 @@ sd(grp$total) > sd(imputedtotal)
 Make a new field that seperates weekdays and weekends
 
 ```r
-w <- mutate(imputed, weekday=ifelse(weekdays(as.Date(imputed$date)) %in% c("Sunday", "Saturday"), "Weekend", "Weekday"))
+w <- mutate(imputed, weekday=ifelse(weekdays(as.Date(imputed$date)) 
+                                    %in% c("Sunday", "Saturday"), "Weekend", "Weekday"))
 ```
 
 Make an aggregation for the mean
