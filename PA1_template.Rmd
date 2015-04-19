@@ -41,8 +41,8 @@ Calculate the total number of steps per day
 5. Draw a histogram.
 ```{r}
 require(dplyr)
-grp <- filter(activity,!is.na(steps)) %>%group_by(day=date) %>% summarise(total=sum(steps))
-hist(grp$total, main="Histogram of Total number\nof Steps per Day", xlab="Total Number of Steps")
+grp <- filter(activity,!is.na(steps)) %>% group_by(day=date) %>% summarise(total=sum(steps))
+hist(grp$total, main="Histogram of Total Number\nof Steps per Day", xlab="Total Number of Steps" ,breaks=12)
 ```
 
 Mean of the total number of steps per day
@@ -55,19 +55,102 @@ Median of the total number of steps per day
 median(grp$total)
 ```
 
-
 ## What is the average daily activity pattern?
 
+To Calculate the average daily pattern
+1. Remove NA's 
+2. Group by intervals
+3. Get the average of the intervals accross the days
 
+```{r}
+pattern <- filter(activity,!is.na(steps)) %>% group_by(interval) %>% summarise(average = mean(steps))
+```
+
+Plot the pattern of average activity
+```{r}
+plot(pattern, type="l", ylab="Average Number of Steps Taken", 
+     main="Time Series of the Average Number of Steps Taken\n
+     Accross all Days in an Interval")
+```
+
+Calculate the 5-minute interval across all days which contains the maximum number of steps
+```{r}
+pattern$interval[pattern$average==max(pattern$average)]
+```
 
 ## Imputing missing values
 
+Calculate the number of missing values in the dataset
+```{r}
+count(activity[!complete.cases(activity),])
+```
+Use the mean for the missing values
 
+Create a new data set with the missing values replaced with mean
+```{r}
+require(Hmisc)
+imputed <- activity
+imputed$steps <- with(imputed, impute(steps,mean))
+imputedtotal <- tapply(imputed$steps, imputed$date,sum)
+```
+
+Create a histogram for the new dataset
+
+```{r}
+hist(imputedtotal, xlab="Total Number of Steps", 
+     main="Histogram of Total Number\nof Steps per Day\nImputing missing values with Average", breaks=12)
+```
+
+Recalculate the Mean for this new dataset
+
+```{r}
+mean(imputedtotal)
+```
+
+Recalculate the Median for this new dataset
+
+```{r}
+median(imputedtotal)
+```
+
+The mean and median are virtually unaffected when mean is used for replacement
+
+The old value for the average total number of steps per day 
+```{r}
+sum(grp$total)
+```
+
+The new value for the average total number of steps per day 
+```{r}
+sum(imputedtotal)
+```
+
+The new dataset has a larger value for the number of steps 
+```{r}
+sum(grp$total) < sum(imputedtotal)
+```
+The standard Deviation is however narrower
+```{r}
+sd(grp$total) > sd(imputedtotal) 
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-
-Reset the working directory
+Make a new field that seperates weekdays and weekends
 ```{r}
-setwd(old.dir)
+w <- mutate(imputed, weekday=ifelse(weekdays(as.Date(imputed$date)) %in% c("Sunday", "Saturday"), "Weekend", "Weekday"))
 ```
+
+Make an aggregation for the mean
+
+Load lattice
+
+Make two plots side by side
+
+```{r}
+gridPlot <- aggregate(steps ~ interval + weekday, w, mean)
+
+require(lattice)
+xyplot(steps ~ interval | weekday, gridPlot, type="l", layout=c(1,2),
+       main="Time series plot of 5-minute Intervals vs Average number\nof steps taken Averaged accross all Weekdays"
+       , ylab="Average Number of Steps")
